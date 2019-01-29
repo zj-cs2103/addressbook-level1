@@ -62,8 +62,29 @@
   find Charlie Betsy
 
 ##########################################################
+# test bookmark person command
+##########################################################
+
+# last active view: [1] betsy [2] charlie
+
+  # should catch invalid args format
+  bookmark
+  bookmark should be only one number
+
+  # should catch invalid index
+  bookmark -1
+  bookmark 0
+  bookmark 3
+
+  #should catch attempt to add something already added
+  bookmark 1
+  bookmark 1
+
+##########################################################
 # test delete person command
 ##########################################################
+
+  find Charlie Betsy
 
 # last active view: [1] betsy [2] charlie
 

@@ -66,6 +66,10 @@
 || 	Parameters: INDEX
 || 	Example: delete 1
 || 
+|| bookmark: Add a bookmark to a person's contacts by the index number used in the last find/list call for the current session.
+|| 	Parameters: INDEX
+|| 	Example: delete 1
+|| 
 || clear: Clears address book permanently.
 || 	Example: clear
 || 
@@ -197,6 +201,49 @@
 || 	2. Dickson Ee  Phone Number: 444444  Email: dickson@nus.edu.sg
 || 
 || 2 persons found!
+|| ===================================================
+|| Enter command: || [Command entered:  find Charlie Betsy]
+|| 	1. Betsy Choo  Phone Number: 222222  Email: benchoo@nus.edu.sg
+|| 	2. Charlie Dickson  Phone Number: 333333  Email: charlie.d@nus.edu.sg
+|| 
+|| 2 persons found!
+|| ===================================================
+|| Enter command: || [Command entered:  bookmark]
+|| Invalid command format: bookmark 
+|| bookmark: Add a bookmark to a person's contacts by the index number used in the last find/list call for the current session.
+|| 	Parameters: INDEX
+|| 	Example: delete 1
+|| 
+|| ===================================================
+|| Enter command: || [Command entered:  bookmark should be only one number]
+|| Invalid command format: bookmark 
+|| bookmark: Add a bookmark to a person's contacts by the index number used in the last find/list call for the current session.
+|| 	Parameters: INDEX
+|| 	Example: delete 1
+|| 
+|| ===================================================
+|| Enter command: || [Command entered:  bookmark -1]
+|| Invalid command format: bookmark 
+|| bookmark: Add a bookmark to a person's contacts by the index number used in the last find/list call for the current session.
+|| 	Parameters: INDEX
+|| 	Example: delete 1
+|| 
+|| ===================================================
+|| Enter command: || [Command entered:  bookmark 0]
+|| Invalid command format: bookmark 
+|| bookmark: Add a bookmark to a person's contacts by the index number used in the last find/list call for the current session.
+|| 	Parameters: INDEX
+|| 	Example: delete 1
+|| 
+|| ===================================================
+|| Enter command: || [Command entered:  bookmark 3]
+|| The person index provided is invalid
+|| ===================================================
+|| Enter command: || [Command entered:  bookmark 1]
+|| Person already bookmarked in address book
+|| ===================================================
+|| Enter command: || [Command entered:  bookmark 1]
+|| Bookmarked Person: Betsy Choo  Phone Number: 222222  Email: benchoo@nus.edu.sg
 || ===================================================
 || Enter command: || [Command entered:  find Charlie Betsy]
 || 	1. Betsy Choo  Phone Number: 222222  Email: benchoo@nus.edu.sg

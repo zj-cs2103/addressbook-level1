@@ -71,6 +71,7 @@ public class AddressBook {
     private static final String MESSAGE_COMMAND_HELP_PARAMETERS = "\tParameters: %1$s";
     private static final String MESSAGE_COMMAND_HELP_EXAMPLE = "\tExample: %1$s";
     private static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted Person: %1$s";
+    private static final String MESSAGE_BOOKMARK_PERSON_SUCCESS = "Bookmarked Person: %1$s";
     private static final String MESSAGE_DISPLAY_PERSON_DATA = "%1$s  Phone Number: %2$s  Email: %3$s";
     private static final String MESSAGE_DISPLAY_LIST_ELEMENT_INDEX = "%1$d. ";
     private static final String MESSAGE_GOODBYE = "Exiting Address Book... Good bye!";
@@ -82,6 +83,7 @@ public class AddressBook {
     private static final String MESSAGE_INVALID_PERSON_DISPLAYED_INDEX = "The person index provided is invalid";
     private static final String MESSAGE_INVALID_STORAGE_FILE_CONTENT = "Storage file has invalid content";
     private static final String MESSAGE_PERSON_NOT_IN_ADDRESSBOOK = "Person could not be found in address book";
+    private static final String MESSAGE_PERSON_ALREADY_BOOKMARKED = "Person already bookmarked in address book";
     private static final String MESSAGE_ERROR_CREATING_STORAGE_FILE = "Error: unable to create file: %1$s";
     private static final String MESSAGE_ERROR_MISSING_STORAGE_FILE = "Storage file missing: %1$s";
     private static final String MESSAGE_ERROR_READING_FROM_FILE = "Unexpected error: unable to read from file: %1$s";
@@ -128,6 +130,12 @@ public class AddressBook {
     private static final String COMMAND_HELP_WORD = "help";
     private static final String COMMAND_HELP_DESC = "Shows program usage instructions.";
     private static final String COMMAND_HELP_EXAMPLE = COMMAND_HELP_WORD;
+
+    private static final String COMMAND_BOOKMARK_WORD = "bookmark";
+    private static final String COMMAND_BOOKMARK_DESC = "Add a bookmark to a person's contacts by the index number "
+                                                      + "used in the last find/list call for the current session.";
+    private static final String COMMAND_BOOKMARK_PARAMETER = "INDEX";
+    private static final String COMMAND_BOOKMARK_EXAMPLE = COMMAND_DELETE_WORD + " 1";
 
     private static final String COMMAND_EXIT_WORD = "exit";
     private static final String COMMAND_EXIT_DESC = "Exits the program.";
@@ -182,6 +190,12 @@ public class AddressBook {
      * List of all persons in the address book.
      */
     private static final ArrayList<String[]> ALL_PERSONS = new ArrayList<>();
+
+    /**
+     * List of all bookmarked persons in the address book for the current session.
+     */
+    private static final ArrayList<String[]> BOOKMARK_PERSONS = new ArrayList<>();
+
 
     /**
      * Stores the most recent list of persons shown to the user as a result of a user command.
@@ -381,8 +395,11 @@ public class AddressBook {
             return executeClearAddressBook();
         case COMMAND_HELP_WORD:
             return getUsageInfoForAllCommands();
+        case COMMAND_BOOKMARK_WORD:
+            return executeBookmarkPerson(commandArgs);
         case COMMAND_EXIT_WORD:
             executeExitProgramRequest();
+
         default:
             return getMessageForInvalidCommandInput(commandType, getUsageInfoForAllCommands());
         }
@@ -512,6 +529,7 @@ public class AddressBook {
                                                           : MESSAGE_PERSON_NOT_IN_ADDRESSBOOK; // not found
     }
 
+
     /**
      * Checks validity of delete person argument string's format.
      *
@@ -538,16 +556,6 @@ public class AddressBook {
     }
 
     /**
-     * Checks that the given index is within bounds and valid for the last shown person list view.
-     *
-     * @param index to check
-     * @return whether it is valid
-     */
-    private static boolean isDisplayIndexValidForLastPersonListingView(int index) {
-        return index >= DISPLAYED_INDEX_OFFSET && index < latestPersonListingView.size() + DISPLAYED_INDEX_OFFSET;
-    }
-
-    /**
      * Constructs a feedback message for a successful delete person command execution.
      *
      * @see #executeDeletePerson(String)
@@ -557,6 +565,72 @@ public class AddressBook {
     private static String getMessageForSuccessfulDelete(String[] deletedPerson) {
         return String.format(MESSAGE_DELETE_PERSON_SUCCESS, getMessageForFormattedPersonData(deletedPerson));
     }
+
+    /**
+     * Bookmarks person identified using last displayed index.
+     *
+     * @param commandArgs full command args string from the user
+     * @return feedback display message for the operation result
+     */
+    private static String executeBookmarkPerson(String commandArgs) {
+        if (!isBookmarkPersonArgsValid(commandArgs)) {
+            return getMessageForInvalidCommandInput(COMMAND_BOOKMARK_WORD, getUsageInfoForBookmarkCommand());
+        }
+        final int targetVisibleIndex = extractTargetIndexFromBookmarkPersonArgs(commandArgs);
+        if (!isDisplayIndexValidForLastPersonListingView(targetVisibleIndex)) {
+            return MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
+        }
+        final String[] targetInModel = getPersonByLastVisibleIndex(targetVisibleIndex);
+        return addPersonToBookmarks(targetInModel) ? getMessageForSuccessfulBookmark(targetInModel) // success
+                                                          : MESSAGE_PERSON_ALREADY_BOOKMARKED; // not found
+    }
+
+    /**
+     * Checks validity of bookmark person argument string's format.
+     *
+     * @param rawArgs raw command args string for the bookmark person command
+     * @return whether the input args string is valid
+     */
+    private static boolean isBookmarkPersonArgsValid(String rawArgs) {
+        try {
+            final int extractedIndex = Integer.parseInt(rawArgs.trim()); // use standard libraries to parse
+            return extractedIndex >= DISPLAYED_INDEX_OFFSET;
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
+
+    /**
+     * Extracts the target's index from the raw bookmark person args string
+     *
+     * @param rawArgs raw command args string for the bookmark person command
+     * @return extracted index
+     */
+    private static int extractTargetIndexFromBookmarkPersonArgs(String rawArgs) {
+        return Integer.parseInt(rawArgs.trim());
+    }
+
+    /**
+     * Constructs a feedback message for a successful bookmark person command execution.
+     *
+     * @see #executeBookmarkPerson(String)
+     * @param bookmarkPerson successfully deleted
+     * @return successful bookmark person feedback message
+     */
+    private static String getMessageForSuccessfulBookmark(String[] bookmarkPerson) {
+        return String.format(MESSAGE_BOOKMARK_PERSON_SUCCESS, getMessageForFormattedPersonData(bookmarkPerson));
+    }
+    
+    /**
+     * Checks that the given index is within bounds and valid for the last shown person list view.
+     *
+     * @param index to check
+     * @return whether it is valid
+     */
+    private static boolean isDisplayIndexValidForLastPersonListingView(int index) {
+        return index >= DISPLAYED_INDEX_OFFSET && index < latestPersonListingView.size() + DISPLAYED_INDEX_OFFSET;
+    }
+
 
     /**
      * Clears all persons in the address book.
@@ -799,6 +873,20 @@ public class AddressBook {
             savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
         }
         return changed;
+    }
+
+    /**
+     * Adds the specified person from the addressbook to the bookmarks if it is not inside. Saves any changes to storage file.
+     *
+     * @param exactPerson the actual person inside the address book (exactPerson == the person to add in the full list)
+     * @return true if the given person was found and added to the bookmarks
+     */
+    private static boolean addPersonToBookmarks(String[] exactPerson) {
+        final boolean bookmarked = BOOKMARK_PERSONS.contains(exactPerson);
+        if (!bookmarked) {
+            BOOKMARK_PERSONS.add(exactPerson);
+        }
+        return bookmarked;
     }
 
     /**
@@ -1086,6 +1174,7 @@ public class AddressBook {
                 + getUsageInfoForFindCommand() + LS
                 + getUsageInfoForViewCommand() + LS
                 + getUsageInfoForDeleteCommand() + LS
+                + getUsageInfoForBookmarkCommand() + LS
                 + getUsageInfoForClearCommand() + LS
                 + getUsageInfoForExitCommand() + LS
                 + getUsageInfoForHelpCommand();
@@ -1110,6 +1199,13 @@ public class AddressBook {
         return String.format(MESSAGE_COMMAND_HELP, COMMAND_DELETE_WORD, COMMAND_DELETE_DESC) + LS
                 + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_DELETE_PARAMETER) + LS
                 + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_DELETE_EXAMPLE) + LS;
+    }
+
+    /** Returns the string for showing 'bookmark' command usage instruction */
+    private static String getUsageInfoForBookmarkCommand() {
+        return String.format(MESSAGE_COMMAND_HELP, COMMAND_BOOKMARK_WORD, COMMAND_BOOKMARK_DESC) + LS
+                + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_BOOKMARK_PARAMETER) + LS
+                + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_BOOKMARK_EXAMPLE) + LS;
     }
 
     /** Returns string for showing 'clear' command usage instruction */
